@@ -1,0 +1,38 @@
+'use client';
+import { useState } from 'react';
+import { USER_STATUS } from '../shared/constants';
+import Blocked from './Blocked';
+import Captcha from './Captcha';
+import Success from './Success';
+
+interface CaptchaProps {}
+
+const CaptchaContainer: React.FC<CaptchaProps> = () => {
+  // State to determine if the user status.
+  const [userStatus, setUserStatus] = useState<string>(USER_STATUS?.pending);
+
+  const renderContent = () => {
+    /* Conditionally render components based on user status */
+    switch (userStatus) {
+      case USER_STATUS.pending:
+        return (
+          <Captcha userStatus={userStatus} setUserStatus={setUserStatus} />
+        );
+      case USER_STATUS.success:
+        return <Success />;
+      case USER_STATUS.blocked:
+        return <Blocked />;
+      default:
+        return (
+          <Captcha userStatus={userStatus} setUserStatus={setUserStatus} />
+        );
+    }
+  };
+  return (
+    <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 bg-white">
+      {renderContent()}
+    </div>
+  );
+};
+
+export default CaptchaContainer;

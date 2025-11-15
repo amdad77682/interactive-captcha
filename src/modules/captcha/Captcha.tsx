@@ -1,8 +1,11 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback } from 'react';
 import { MAX_ATTEMPTS, USER_STATUS } from '../shared/constants';
+import useCameraFeed from '../shared/hooks/useCameraFeed';
+import useStepAndAttempt from '../shared/hooks/useStepAndAttempt';
+import useVideoCapture from '../shared/hooks/useVideoCapture';
 import { CaptchaStep } from '../shared/interface';
 import CameraStream from './CameraStream';
-import ImageGridCaptcha from './ImageGridCaptcha';
+import ImageGridCaptchaSelector from './ImageGridSelector';
 
 interface CaptchaProps {
   userStatus: string;
@@ -10,13 +13,17 @@ interface CaptchaProps {
 }
 
 const Captcha: React.FC<CaptchaProps> = ({ userStatus, setUserStatus }) => {
-  // State for the current step of the CAPTCHA process.
-  const [step, setStep] = useState<CaptchaStep>(CaptchaStep.Camera);
-  // State to track the number of validation attempts remaining.
-  const [attemptsLeft, setAttemptsLeft] = useState<number>(MAX_ATTEMPTS);
-  // A key to force re-mounting and resetting the Captcha component for a new attempt.
-  const [captchaKey, setCaptchaKey] = useState<number>(Date.now());
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const {
+    updateStep,
+    handleTryAgain,
+    step,
+    attemptsLeft,
+    setAttemptsLeft,
+    canvasRef,
+  } = useStepAndAttempt();
+
+  useCameraFeed();
+
   /**
    * Callback function triggered when the CAPTCHA validation is complete.
    * @param {boolean} success - Indicates whether the validation was successful.
@@ -33,31 +40,26 @@ const Captcha: React.FC<CaptchaProps> = ({ userStatus, setUserStatus }) => {
         }
       }
     },
-    [attemptsLeft]
+    [attemptsLeft, setUserStatus, setAttemptsLeft]
   );
-  const updateStep = (newStep: CaptchaStep) => {
-    setStep(newStep);
-  };
 
-  /**
-   * Resets the CAPTCHA for a new attempt.
-   */
-  const handleTryAgain = () => {
-    setCaptchaKey(Date.now()); // Change key to force re-render and reset state of Captcha component
-  };
+  const {
+    containerRef,
+    handleCapture,
+    handleValidate: handleCaptchaValidation,
+  } = useVideoCapture({ onValidate: handleValidate });
 
   const rederCaptchaStep = () => {
     switch (step) {
       case CaptchaStep.Camera:
+        return <CameraStream onValidate={handleValidate} />;
+      case CaptchaStep.Grid:
         return (
-          <CameraStream
-            canvasRef={canvasRef}
-            updateStep={updateStep}
-            onValidate={handleValidate}
+          <ImageGridCaptchaSelector
+            containerRef={containerRef}
+            handleValidate={handleCaptchaValidation}
           />
         );
-      case CaptchaStep.Grid:
-        return <ImageGridCaptcha />;
       default:
         return null;
     }
@@ -65,7 +67,7 @@ const Captcha: React.FC<CaptchaProps> = ({ userStatus, setUserStatus }) => {
   // Camera step component goes here
   return (
     <div>
-      <h1 className="font-bold text-xl">Take Selfie</h1>
+      <h1 className="font-bold text-xl text-center py-4">Take Selfie</h1>
       {attemptsLeft < MAX_ATTEMPTS && userStatus !== USER_STATUS.success && (
         <div className="mb-4 text-center p-4 bg-red-900/50 border border-red-700 rounded-lg">
           <p className="font-bold text-red-400">

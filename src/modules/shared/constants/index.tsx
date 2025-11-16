@@ -4,12 +4,13 @@ import { Color, Shape } from "../interface";
 const MAX_ATTEMPTS = 3;
 const USER_STATUS = {
   pending: 'pending',
+  failed: 'failed',
   blocked: 'blocked',
   success: 'success',
 };
 
-const GRID_SIZE = 4; // Creates a 4x4 grid
-const SQUARE_SIZE_PERCENT = 0.5; // The moving square will be 50% of the container's smaller dimension
+const GRID_SIZE = 5; // Creates a 4x4 grid
+const SQUARE_SIZE_PERCENT = 0.8; // The moving square will be 50% of the container's smaller dimension
 const MOVE_INTERVAL_MS = 1500; // The square moves every 1.5 seconds
 
 const SHAPES = [Shape.Triangle, Shape.Square, Shape.Circle];

@@ -28,11 +28,9 @@ const ImageGridCaptchaSelector: React.FC<ImageGridCaptchaProps> = ({
   };
   return (
     <div className="flex flex-col">
-      <div className="text-center mb-4 p-4 bg-gray-800 rounded-lg">
-        <p className="text-lg text-gray-300">
-          Please select all sectors containing a:
-        </p>
-        <div className="flex items-center justify-center gap-3 mt-2">
+      <div className="flex items-center justify-center gap-4  text-center mb-4 p-4 rounded-lg">
+        <p className="text-lg">Please select all sectors containing a:</p>
+        <div className="flex items-center justify-center gap-3 ">
           {target && ShapeComponent && (
             <ShapeComponent
               className={`w-8 h-8 fill-current ${targetColorClass}`}
@@ -55,7 +53,7 @@ const ImageGridCaptchaSelector: React.FC<ImageGridCaptchaProps> = ({
           />
         )}
         <div
-          className="absolute grid"
+          className="absolute grid bg-gray-200/50"
           style={{
             width: `${squareSize}px`,
             height: `${squareSize}px`,
@@ -88,7 +86,7 @@ const ImageGridCaptchaSelector: React.FC<ImageGridCaptchaProps> = ({
       <div className="mt-4">
         <button
           onClick={handleValidate}
-          className="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors"
+          className="w-full uppercase bg-[#F5B427] text-white font-bold py-3 px-4 rounded-lg hover:bg-[#D4A017] transition-colors"
         >
           Validate
         </button>

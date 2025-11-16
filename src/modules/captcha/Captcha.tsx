@@ -1,27 +1,18 @@
 import { useCallback } from 'react';
 import { MAX_ATTEMPTS, USER_STATUS } from '../shared/constants';
+import { useStepContext } from '../shared/context/StepContext';
 import useCameraFeed from '../shared/hooks/useCameraFeed';
 import useStepAndAttempt from '../shared/hooks/useStepAndAttempt';
 import useVideoCapture from '../shared/hooks/useVideoCapture';
 import { CaptchaStep } from '../shared/interface';
 import CameraStream from './CameraStream';
 import ImageGridCaptchaSelector from './ImageGridSelector';
+import { TriangleAlert } from 'lucide-react';
 
-interface CaptchaProps {
-  userStatus: string;
-  setUserStatus: (status: string) => void;
-}
-
-const Captcha: React.FC<CaptchaProps> = ({ userStatus, setUserStatus }) => {
-  const {
-    updateStep,
-    handleTryAgain,
-    step,
-    attemptsLeft,
-    setAttemptsLeft,
-    canvasRef,
-  } = useStepAndAttempt();
-
+const Captcha: React.FC = () => {
+  const { userStatus, setUserStatus } = useStepContext();
+  const { handleTryAgain, step, attemptsLeft, setAttemptsLeft, canvasRef } =
+    useStepAndAttempt();
   useCameraFeed();
 
   /**
@@ -37,17 +28,16 @@ const Captcha: React.FC<CaptchaProps> = ({ userStatus, setUserStatus }) => {
         setAttemptsLeft(newAttemptsLeft);
         if (newAttemptsLeft <= 0) {
           setUserStatus(USER_STATUS.blocked);
+        } else {
+          setUserStatus(USER_STATUS.failed);
         }
       }
     },
     [attemptsLeft, setUserStatus, setAttemptsLeft]
   );
 
-  const {
-    containerRef,
-    handleCapture,
-    handleValidate: handleCaptchaValidation,
-  } = useVideoCapture({ onValidate: handleValidate });
+  const { containerRef, handleValidate: handleCaptchaValidation } =
+    useVideoCapture({ onValidate: handleValidate });
 
   const rederCaptchaStep = () => {
     switch (step) {
@@ -67,29 +57,38 @@ const Captcha: React.FC<CaptchaProps> = ({ userStatus, setUserStatus }) => {
   // Camera step component goes here
   return (
     <div>
-      <h1 className="font-bold text-xl text-center py-4">Take Selfie</h1>
-      {attemptsLeft < MAX_ATTEMPTS && userStatus !== USER_STATUS.success && (
-        <div className="mb-4 text-center p-4 bg-red-900/50 border border-red-700 rounded-lg">
-          <p className="font-bold text-red-400">
+      <h1 className="font-bold text-xl text-center py-4">
+        {step == CaptchaStep.Camera
+          ? 'Take Selfie'
+          : step == CaptchaStep.Grid
+            ? 'Select shape'
+            : ''}
+      </h1>
+      {attemptsLeft < MAX_ATTEMPTS && userStatus == USER_STATUS.failed && (
+        <div className="mb-4 text-center p-4  rounded-lg">
+          <TriangleAlert size={80} className="mx-auto mb-2 text-red-400 " />
+          <p className="font-bold text-lg text-red-400">
             Validation failed. Please try again.
           </p>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm py-2">
             {attemptsLeft} {attemptsLeft === 1 ? 'attempt' : 'attempts'}{' '}
             remaining.
           </p>
           <button
             onClick={handleTryAgain}
-            className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            className="w-full uppercase bg-[#F5B427] mt-2 px-4 py-2 text-white rounded-md hover:bg-[#D4A017] transition-colors"
           >
             Try Again
           </button>
         </div>
       )}
 
-      <div className="p-4 md:p-6 bg-gray-800 rounded-xl shadow-2xl border border-gray-700">
-        <canvas ref={canvasRef} className="hidden" />
-        {rederCaptchaStep()}
-      </div>
+      {userStatus === USER_STATUS.pending && (
+        <div>
+          <canvas ref={canvasRef} className="hidden" />
+          {rederCaptchaStep()}
+        </div>
+      )}
     </div>
   );
 };

@@ -4,7 +4,7 @@ import { CaptchaProvider } from '@/src/models/context/CaptchaContext';
 import { SquareProvider } from '@/src/models/context/SquareContext';
 import { StepProvider, useStepContext } from '@/src/models/context/StepContext';
 import Blocked from './Blocked';
-import Captcha from './Captcha';
+import Captcha from './CaptchaSteps';
 import Success from './Success';
 
 const CaptchaContent: React.FC = () => {

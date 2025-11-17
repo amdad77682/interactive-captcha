@@ -30,7 +30,8 @@ This project follows the **MVVM (Model-View-ViewModel)** architectural pattern, 
 │  (React Components - Presentation Layer)        │
 │  • CameraStream.tsx                             │
 │  • ImageGridSelector.tsx                        │
-│  • Captcha.tsx (Orchestrator)                   │
+│  • CaptchaSteps.tsx (Step Orchestrator)        │
+│  • CaptchaUserSteps.tsx (Root with Providers)  │
 │  • Success.tsx, Blocked.tsx                     │
 └──────────────┬──────────────────────────────────┘
                │ Data Binding (Props & Context)
@@ -92,8 +93,8 @@ interactive-captcha-meldcx/
 │   │   └── captcha/             # CAPTCHA UI components
 │   │       ├── Blocked.tsx      # Blocked state screen
 │   │       ├── CameraStream.tsx # Camera feed with moving square 
-│   │       ├── Captcha.tsx      # Main orchestrator component
-│   │       ├── CaptchaContainer.tsx  # Root container with providers 
+│   │       ├── CaptchaSteps.tsx # CAPTCHA step orchestrator
+│   │       ├── CaptchaUserSteps.tsx # Root container with providers 
 │   │       ├── ImageGridSelector.tsx # Grid selection interface
 │   │       └── Success.tsx      # Success state screen
 │   ├── viewmodels/              # VIEWMODEL LAYER (MVVM)
@@ -134,9 +135,9 @@ This project implements the **MVVM pattern** adapted for React's component-based
 **Components:**
 - `CameraStream.tsx` - Displays camera feed with moving square overlay
 - `ImageGridSelector.tsx` - Renders captured image with selectable grid
-- `Captcha.tsx` - Main orchestrator that routes between views
+- `CaptchaSteps.tsx` - Step orchestrator that routes between camera and grid views
+- `CaptchaUserSteps.tsx` - Root component with Context providers and user status routing
 - `Success.tsx`, `Blocked.tsx` - Result screens
-- `CaptchaContainer.tsx` - Root component with provider setup
 
 **Characteristics:**
 - Zero business logic
@@ -340,7 +341,7 @@ User Interaction → VIEW → ViewModel → Model → ViewModel → VIEW → UI 
 
 5. **VIEW** (React re-renders with new data):
    ```tsx
-   // Captcha.tsx switches view
+   // CaptchaSteps.tsx switches view
    {step === CaptchaStep.Grid && <ImageGridSelector />}
    
    // ImageGridSelector.tsx displays new data
@@ -433,8 +434,9 @@ CaptchaContainer
 
 ### 4. **Container/Presenter Pattern**
 
-- **Containers** (`Captcha.tsx`): Manage state and logic
+- **Containers** (`CaptchaSteps.tsx`): Manage step orchestration and validation logic
 - **Presenters** (`CameraStream.tsx`, `ImageGridSelector.tsx`): Display UI
+- **Root Container** (`CaptchaUserSteps.tsx`): Provides Context and routes based on user status
 
 ### 5. **State Machine Pattern**
 
@@ -624,7 +626,7 @@ const { target, gridSectors, toggleSectorSelection } = useCaptchaContext();
 
 ### 1. useCameraFeed
 
-**File**: `src/modules/shared/hooks/useCameraFeed.ts`
+**File**: `src/viewmodels/useCameraFeed.ts`
 
 **Purpose**: Initialize and manage camera stream
 
@@ -660,7 +662,7 @@ useEffect(() => {
 
 ### 2. useSquareRandomMove
 
-**File**: `src/modules/shared/hooks/useSquareRandomMove.ts`
+**File**: `src/viewmodels/useSquareRandomMove.ts`
 
 **Purpose**: Animate moving square overlay
 
@@ -699,7 +701,7 @@ setSquarePosition({
 
 ### 3. useVideoCapture
 
-**File**: `src/modules/shared/hooks/useVideoCapture.ts`
+**File**: `src/viewmodels/useVideoCapture.ts`
 
 **Purpose**: Capture camera frame and generate CAPTCHA grid
 
@@ -749,7 +751,7 @@ const imageData = canvas.toDataURL('image/jpeg');
 
 ### 4. useStepAndAttempt
 
-**File**: `src/modules/shared/hooks/useStepAndAttempt.ts`
+**File**: `src/viewmodels/useStepAndAttempt.ts`
 
 **Purpose**: Manage CAPTCHA flow and retry attempts
 
@@ -786,7 +788,7 @@ const handleTryAgain = () => {
 
 ### 5. useCaptchaSelector
 
-**File**: `src/modules/shared/hooks/useCaptchaSelector.ts`
+**File**: `src/viewmodels/useCaptchaSelector.ts`
 
 **Purpose**: Provide CAPTCHA state for grid selection UI
 
@@ -809,11 +811,11 @@ Convenience hook that wraps `useCaptchaContext()` for the ImageGridSelector comp
 
 ## Components
 
-### CaptchaContainer
+### CaptchaUserSteps
 
-**File**: `src/modules/captcha/CaptchaContainer.tsx`
+**File**: `src/views/captcha/CaptchaUserSteps.tsx`
 
-**Purpose**: Root component with provider composition
+**Purpose**: Root component with provider composition and user status routing
 
 **Structure:**
 
@@ -829,17 +831,20 @@ Convenience hook that wraps `useCaptchaContext()` for the ImageGridSelector comp
 
 **Responsibilities:**
 
-- Initialize all contexts
-- Route to appropriate screen based on userStatus
+- Initialize all contexts (StepContext, SquareContext, CaptchaContext)
+- Route to appropriate screen based on userStatus:
+  - `USER_STATUS.success` → Success component
+  - `USER_STATUS.blocked` → Blocked component
+  - Default (pending/failed) → CaptchaSteps component
 - Maintain proper provider hierarchy
 
 ---
 
-### Captcha
+### CaptchaSteps
 
-**File**: `src/modules/captcha/Captcha.tsx`
+**File**: `src/views/captcha/CaptchaSteps.tsx`
 
-**Purpose**: Main orchestrator component
+**Purpose**: Step orchestrator that manages CAPTCHA flow and validation
 
 **State Flow:**
 
@@ -848,9 +853,12 @@ const handleValidate = (success: boolean) => {
   if (success) {
     setUserStatus(USER_STATUS.success);
   } else {
-    attemptsLeft--;
-    if (attemptsLeft <= 0) {
+    const newAttemptsLeft = attemptsLeft - 1;
+    setAttemptsLeft(newAttemptsLeft);
+    if (newAttemptsLeft <= 0) {
       setUserStatus(USER_STATUS.blocked);
+    } else {
+      setUserStatus(USER_STATUS.failed);
     }
   }
 };
@@ -858,16 +866,17 @@ const handleValidate = (success: boolean) => {
 
 **Renders:**
 
-- Attempt counter
-- Retry button (after failure)
-- Canvas element (hidden, used for capture)
-- Current step component (CameraStream or ImageGridSelector)
+- Attempt counter UI
+- Retry button (when status is 'failed')
+- Current step component based on `step`:
+  - `CaptchaStep.Camera` → CameraStream component
+  - `CaptchaStep.Grid` → ImageGridSelector component
 
 ---
 
 ### CameraStream
 
-**File**: `src/modules/captcha/CameraStream.tsx`
+**File**: `src/views/captcha/CameraStream.tsx`
 
 **Purpose**: Display camera feed with moving square
 
@@ -896,7 +905,7 @@ const handleValidate = (success: boolean) => {
 
 ### ImageGridSelector
 
-**File**: `src/modules/captcha/ImageGridSelector.tsx`
+**File**: `src/views/captcha/ImageGridSelector.tsx`
 
 **Purpose**: Display captured image with selectable grid
 
@@ -1212,7 +1221,7 @@ User clicks "Validate"
 **Where it's used:**
 
 ```typescript
-// src/modules/shared/constants/index.tsx
+// src/models/constants/index.tsx
 import { CircleIcon, SquareIcon, TriangleIcon } from 'lucide-react';
 
 const SHAPE_MAP = {
@@ -1552,6 +1561,43 @@ npm run lint
 
 ---
 
+## Recent Component Restructuring
+
+**Date**: November 17, 2025
+
+The View layer components were reorganized for better separation of concerns:
+
+### Changes Made:
+
+1. **`Captcha.tsx` → `CaptchaSteps.tsx`**
+   - Renamed to better reflect its purpose as a step orchestrator
+   - Manages routing between Camera and Grid steps
+   - Handles validation callbacks and attempt management
+
+2. **`CaptchaContainer.tsx` → `CaptchaUserSteps.tsx`**
+   - Renamed to better reflect its purpose as user status router
+   - Provides all Context providers (StepContext, SquareContext, CaptchaContext)
+   - Routes between Success, Blocked, and CaptchaSteps based on user status
+
+### File Structure:
+```
+src/views/captcha/
+├── CaptchaUserSteps.tsx    # Root: Providers + User Status Routing
+├── CaptchaSteps.tsx         # Step Orchestrator: Camera ↔ Grid
+├── CameraStream.tsx         # Camera Feed UI
+├── ImageGridSelector.tsx    # Grid Selection UI
+├── Success.tsx              # Success Screen
+└── Blocked.tsx              # Blocked Screen
+```
+
+### Benefits:
+- ✅ **Clearer naming**: Component names now reflect their specific roles
+- ✅ **Better separation**: User status routing separated from step orchestration
+- ✅ **Easier navigation**: Developers can quickly understand component hierarchy
+- ✅ **Maintainability**: Changes to routing logic are isolated to specific files
+
+---
+
 ## Browser Compatibility
 
 **Minimum Requirements:**
@@ -1576,7 +1622,7 @@ npm run lint
 
 This interactive CAPTCHA system demonstrates modern React architecture with:
 
-✅ **Clean Architecture**: Separated contexts, hooks, and components  
+✅ **Clean Architecture**: MVVM pattern with clear separation of concerns  
 ✅ **Type Safety**: Full TypeScript coverage  
 ✅ **Performance**: Optimized re-renders with context splitting  
 ✅ **Maintainability**: Clear structure and responsibilities  

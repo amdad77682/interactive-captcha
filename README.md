@@ -20,54 +20,6 @@
 
 An interactive CAPTCHA system that combines camera-based verification with visual pattern recognition. The CAPTCHA process shows the user a live selfie camera feed with a constantly moving square. When the user clicks Continue, the square's position is locked and a photo is taken. In the next step, that captured image is displayed with the square divided into multiple sectors. Random sectors contain watermarks shaped as triangles, squares, or circles. The system randomly chooses one shape, and the user must select all sectors containing that shape. After clicking Validate, the user is shown whether they passed the CAPTCHA test.
 
-### Architecture Pattern: MVVM (Model-View-ViewModel)
-
-This project follows the **MVVM (Model-View-ViewModel)** architectural pattern, adapted for React:
-
-```
-┌─────────────────────────────────────────────────┐
-│                    VIEW                          │
-│  (React Components - Presentation Layer)        │
-│  • CameraStream.tsx                             │
-│  • ImageGridSelector.tsx                        │
-│  • CaptchaSteps.tsx (Step Orchestrator)        │
-│  • CaptchaUserSteps.tsx (Root with Providers)  │
-│  • Success.tsx, Blocked.tsx                     │
-└──────────────┬──────────────────────────────────┘
-               │ Data Binding (Props & Context)
-               ↓
-┌─────────────────────────────────────────────────┐
-│                 VIEWMODEL                        │
-│  (Custom Hooks - Business Logic Layer)          │
-│  • useVideoCapture (capture & validation logic) │
-│  • useCameraFeed (camera management)            │
-│  • useSquareRandomMove (animation logic)        │
-│  • useStepAndAttempt (flow control)             │
-│  • useCaptchaSelector (selection management)    │
-└──────────────┬──────────────────────────────────┘
-               │ State Management
-               ↓
-┌─────────────────────────────────────────────────┐
-│                   MODEL                          │
-│  (Data Layer - State & Business Entities)       │
-│  • Context APIs (Global State):                 │
-│    - StepContext (step, userStatus, refs)       │
-│    - SquareContext (animation state)            │
-│    - CaptchaContext (challenge data)            │
-│  • Interfaces (TypeScript Types):               │
-│    - Sector, Shape, Color, CaptchaStep         │
-│  • Constants (Configuration)                    │
-└─────────────────────────────────────────────────┘
-```
-
-**Benefits of MVVM in this project:**
-- ✅ **Separation of Concerns**: UI (View) separated from business logic (ViewModel) and data (Model)
-- ✅ **Testability**: ViewModels (hooks) can be tested independently
-- ✅ **Reusability**: ViewModels can be reused across different Views
-- ✅ **Maintainability**: Changes in one layer don't affect others
-- ✅ **Data Binding**: React Context provides automatic updates to Views
-
----
 
 ## Technology Stack
 
@@ -126,6 +78,42 @@ interactive-captcha-meldcx/
 ### Primary Architecture: MVVM (Model-View-ViewModel)
 
 This project implements the **MVVM pattern** adapted for React's component-based architecture. Here's how each layer maps to the codebase:
+
+```
+┌─────────────────────────────────────────────────┐
+│                    VIEW                          │
+│  (React Components - Presentation Layer)        │
+│  • CameraStream.tsx                             │
+│  • ImageGridSelector.tsx                        │
+│  • CaptchaSteps.tsx (Step Orchestrator)        │
+│  • CaptchaUserSteps.tsx (Root with Providers)  │
+│  • Success.tsx, Blocked.tsx                     │
+└──────────────┬──────────────────────────────────┘
+               │ Data Binding (Props & Context)
+               ↓
+┌─────────────────────────────────────────────────┐
+│                 VIEWMODEL                        │
+│  (Custom Hooks - Business Logic Layer)          │
+│  • useVideoCapture (capture & validation logic) │
+│  • useCameraFeed (camera management)            │
+│  • useSquareRandomMove (animation logic)        │
+│  • useStepAndAttempt (flow control)             │
+│  • useCaptchaSelector (selection management)    │
+└──────────────┬──────────────────────────────────┘
+               │ State Management
+               ↓
+┌─────────────────────────────────────────────────┐
+│                   MODEL                          │
+│  (Data Layer - State & Business Entities)       │
+│  • Context APIs (Global State):                 │
+│    - StepContext (step, userStatus, refs)       │
+│    - SquareContext (animation state)            │
+│    - CaptchaContext (challenge data)            │
+│  • Interfaces (TypeScript Types):               │
+│    - Sector, Shape, Color, CaptchaStep         │
+│  • Constants (Configuration)                    │
+└─────────────────────────────────────────────────┘
+```
 
 #### 🎨 VIEW Layer (Presentation)
 **Location**: `src/views/captcha/*.tsx`
@@ -373,109 +361,6 @@ User Interaction → VIEW → ViewModel → Model → ViewModel → VIEW → UI 
 4. **Testability Requirements**: Business logic must be testable without rendering UI
 5. **React Best Practices**: Custom hooks are React's natural ViewModel layer
 
----
-
-### Additional Design Patterns
-
-Beyond the primary MVVM architecture, the project implements several supporting patterns:
-
-### 1. **Provider Pattern (Context API)**
-
-The application uses React Context API extensively to avoid prop drilling and provide global state management.
-
-**Implementation:**
-
-- Three separate contexts for different concerns (Separation of Concerns principle)
-- Provider composition in `CaptchaContainer`
-- Custom hooks for consuming contexts
-
-**Benefits:**
-
-- Clean component APIs (no excessive prop passing)
-- Centralized state management
-- Easy state sharing across component tree
-- Type-safe with TypeScript
-- **Supports MVVM**: Contexts act as the Model layer
-
-### 2. **Custom Hooks Pattern (ViewModel Layer)**
-
-Business logic is extracted into reusable custom hooks, which serve as the **ViewModel layer in MVVM**.
-
-**Examples:**
-
-- `useCameraFeed`: Encapsulates camera initialization and cleanup
-- `useVideoCapture`: Handles frame capture and grid generation
-- `useSquareRandomMove`: Manages square animation logic
-
-**Benefits:**
-
-- Separation of concerns
-- Reusability across components
-- Testability (can test without rendering UI)
-- Cleaner components (focus on presentation)
-- **Core to MVVM**: Hooks are ViewModels that connect View and Model
-
-### 3. **Component Composition Pattern (View Layer)**
-
-Small, focused components composed together to create complex UIs, forming the **View layer in MVVM**.
-
-**Example:**
-
-```
-CaptchaContainer
-  └── StepProvider
-      └── SquareProvider
-          └── CaptchaProvider
-              └── CaptchaContent
-                  └── Captcha
-                      ├── CameraStream
-                      └── ImageGridSelector
-```
-
-### 4. **Container/Presenter Pattern**
-
-- **Containers** (`CaptchaSteps.tsx`): Manage step orchestration and validation logic
-- **Presenters** (`CameraStream.tsx`, `ImageGridSelector.tsx`): Display UI
-- **Root Container** (`CaptchaUserSteps.tsx`): Provides Context and routes based on user status
-
-### 5. **State Machine Pattern**
-
-The CAPTCHA flow follows a finite state machine:
-
-```
-pending → Camera Step → Grid Step → Result → (success/blocked/retry)
-```
-
-Controlled by `CaptchaStep` enum and managed in `StepContext`.
-
-### 6. **Strategy Pattern**
-
-Different validation strategies based on user attempts:
-
-- Success: Grant access
-- Failure with attempts left: Allow retry
-- Max attempts reached: Block user
-
-### 7. **Observer Pattern (React Refs)**
-
-Refs observe DOM elements without causing re-renders:
-
-- `videoRef`: Monitors video element
-- `canvasRef`: Monitors canvas element
-- `containerRef`: Monitors container dimensions
-
-### 8. **Factory Pattern**
-
-Grid generation uses a factory-like approach:
-
-```typescript
-const newSectors = allIndices.map(id => {
-  if (watermarkIndices.has(id)) {
-    return { id, shape, color }; // Create watermarked sector
-  }
-  return { id, shape: null, color: null }; // Create empty sector
-});
-```
 
 ---
 
@@ -487,7 +372,7 @@ The application uses a **three-tier context system**:
 
 ```
 ┌─────────────────────────────────────────┐
-│         StepContext (Outer)             │
+│   StepContext (Outer)                   │
 │  - step, userStatus                     │
 │  - videoRef, canvasRef                  │
 │  ┌───────────────────────────────────┐  │
@@ -1561,42 +1446,6 @@ npm run lint
 
 ---
 
-## Recent Component Restructuring
-
-**Date**: November 17, 2025
-
-The View layer components were reorganized for better separation of concerns:
-
-### Changes Made:
-
-1. **`Captcha.tsx` → `CaptchaSteps.tsx`**
-   - Renamed to better reflect its purpose as a step orchestrator
-   - Manages routing between Camera and Grid steps
-   - Handles validation callbacks and attempt management
-
-2. **`CaptchaContainer.tsx` → `CaptchaUserSteps.tsx`**
-   - Renamed to better reflect its purpose as user status router
-   - Provides all Context providers (StepContext, SquareContext, CaptchaContext)
-   - Routes between Success, Blocked, and CaptchaSteps based on user status
-
-### File Structure:
-```
-src/views/captcha/
-├── CaptchaUserSteps.tsx    # Root: Providers + User Status Routing
-├── CaptchaSteps.tsx         # Step Orchestrator: Camera ↔ Grid
-├── CameraStream.tsx         # Camera Feed UI
-├── ImageGridSelector.tsx    # Grid Selection UI
-├── Success.tsx              # Success Screen
-└── Blocked.tsx              # Blocked Screen
-```
-
-### Benefits:
-- ✅ **Clearer naming**: Component names now reflect their specific roles
-- ✅ **Better separation**: User status routing separated from step orchestration
-- ✅ **Easier navigation**: Developers can quickly understand component hierarchy
-- ✅ **Maintainability**: Changes to routing logic are isolated to specific files
-
----
 
 ## Browser Compatibility
 
@@ -1631,8 +1480,3 @@ This interactive CAPTCHA system demonstrates modern React architecture with:
 
 The design patterns implemented ensure the codebase remains maintainable as it grows while providing a solid foundation for future enhancements.
 
----
-
-**Last Updated**: November 17, 2025  
-**Version**: 0.1.0  
-**Author**: MeldCX Team

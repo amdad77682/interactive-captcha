@@ -18,12 +18,8 @@
 
 ## Project Overview
 
-An interactive CAPTCHA system that combines camera-based verification with visual pattern recognition. Users must:
+An interactive CAPTCHA system that combines camera-based verification with visual pattern recognition. The CAPTCHA process shows the user a live selfie camera feed with a constantly moving square. When the user clicks Continue, the square’s position is locked and a photo is taken. In the next step, that captured image is displayed with the square divided into multiple sectors. Random sectors contain watermarks shaped as triangles, squares, or circles. The system randomly chooses one shape, and the user must select all sectors containing that shape. After clicking Validate, the user is shown whether they passed the CAPTCHA test.
 
-1. Position their face within a moving square overlay on a live camera feed
-2. Identify and select grid sectors containing specific colored shapes (watermarks)
-
-This creates a multi-layered verification system that's difficult for bots to bypass while maintaining user-friendliness.
 
 ---
 
@@ -44,15 +40,15 @@ This creates a multi-layered verification system that's difficult for bots to by
 interactive-captcha-meldcx/
 ├── app/                          # Next.js app directory
 │   ├── layout.tsx               # Root layout
-│   ├── page.tsx                 # Main entry point
+│   ├── page.tsx                 # Main entry point 
 │   └── globals.css              # Global styles
 ├── src/
 │   └── modules/
 │       ├── captcha/             # CAPTCHA UI components
 │       │   ├── Blocked.tsx      # Blocked state screen
-│       │   ├── CameraStream.tsx # Camera feed with overlay
+│       │   ├── CameraStream.tsx # Camera feed with moving square 
 │       │   ├── Captcha.tsx      # Main orchestrator component
-│       │   ├── CaptchaContainer.tsx  # Root container with providers
+│       │   ├── CaptchaContainer.tsx  # Root container with providers 
 │       │   ├── ImageGridSelector.tsx # Grid selection interface
 │       │   └── Success.tsx      # Success state screen
 │       └── shared/              # Shared resources
@@ -61,7 +57,7 @@ interactive-captcha-meldcx/
 │           ├── context/         # React Context providers
 │           │   ├── CaptchaContext.tsx   # CAPTCHA data state
 │           │   ├── SquareContext.tsx    # Moving square state
-│           │   └── StepContext.tsx      # Step & refs state
+│           │   └── StepContext.tsx      # Step, user status and refs state
 │           ├── hooks/           # Custom React hooks
 │           │   ├── useCameraFeed.ts         # Camera initialization
 │           │   ├── useCaptchaSelector.ts    # Grid selection logic
@@ -1183,136 +1179,6 @@ const handleCapture = () => {
 
 ---
 
-## Security Considerations
-
-### 1. Client-Side Validation
-
-**Current**: All validation happens client-side
-
-**Production Recommendation**:
-
-- Send challenge result to backend
-- Validate server-side
-- Generate tokens/JWT
-- Rate limit requests
-
-### 2. Challenge Randomization
-
-- Random square positions
-- Random watermark placement
-- Random target selection
-- Makes automated solving difficult
-
-### 3. Time-Based Challenges
-
-- Could add: Minimum time in camera step
-- Could add: Maximum time in grid step
-- Prevents instant bot submission
-
-### 4. Image Analysis
-
-- Captured image proves human presence
-- Could add: Server-side face detection
-- Could add: Liveness detection
-
----
-
-## Testing Recommendations
-
-### Unit Tests
-
-```typescript
-// Test custom hooks
-describe('useCaptchaSelector', () => {
-  it('should toggle sector selection', () => {
-    // ...
-  });
-});
-
-// Test context providers
-describe('CaptchaContext', () => {
-  it('should reset state', () => {
-    // ...
-  });
-});
-```
-
-### Integration Tests
-
-```typescript
-// Test component interactions
-describe('Captcha Flow', () => {
-  it('should navigate from camera to grid', () => {
-    // ...
-  });
-
-  it('should validate correct selection', () => {
-    // ...
-  });
-});
-```
-
-### E2E Tests
-
-```typescript
-// Test full user flow
-describe('Complete CAPTCHA', () => {
-  it('should allow user to complete captcha', () => {
-    // 1. Grant camera permission
-    // 2. Click continue
-    // 3. Select correct sectors
-    // 4. Validate
-    // 5. Assert success screen
-  });
-});
-```
-
----
-
-## Future Enhancements
-
-### 1. Backend Integration
-
-- Server-side validation
-- Session management
-- Challenge tokens
-- API rate limiting
-
-### 2. Accessibility
-
-- Screen reader support
-- Keyboard navigation
-- High contrast mode
-- Audio CAPTCHA alternative
-
-### 3. Advanced Security
-
-- Face detection verification
-- Liveness detection (blink, smile)
-- ML-based bot detection
-- Browser fingerprinting
-
-### 4. Analytics
-
-- Track completion rates
-- Monitor failure patterns
-- A/B test difficulty
-- User behavior analysis
-
-### 5. Localization
-
-- Multi-language support
-- RTL layout support
-- Cultural shape variations
-
-### 6. Mobile Optimization
-
-- Touch gesture optimization
-- Mobile camera handling
-- Responsive grid sizing
-- Portrait/landscape support
-
----
 
 ## Troubleshooting
 
@@ -1399,29 +1265,7 @@ npm run lint
 - ES6+ (Classes, Arrow functions, Async/await)
 - React 19 features
 
----
 
-## Contributing Guidelines
-
-### Code Style
-
-- Use TypeScript for all new files
-- Follow existing component structure
-- Use functional components with hooks
-- Keep components focused (single responsibility)
-
-### Context Updates
-
-- Don't add to existing contexts unnecessarily
-- Consider creating new context if state is unrelated
-- Always provide proper TypeScript types
-
-### Hook Creation
-
-- Extract reusable logic into custom hooks
-- Name hooks with `use` prefix
-- Document parameters and return values
-- Handle cleanup properly (useEffect returns)
 
 ---
 

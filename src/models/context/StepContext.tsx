@@ -1,3 +1,5 @@
+import { USER_STATUS } from '@/src/models/constants';
+import { CaptchaStep } from '@/src/models/interface';
 import React, {
   createContext,
   ReactNode,
@@ -6,8 +8,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { CaptchaStep } from '../interface';
-import { USER_STATUS } from '../constants';
 
 interface StepContextType {
   step: CaptchaStep;

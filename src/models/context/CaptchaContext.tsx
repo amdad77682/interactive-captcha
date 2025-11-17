@@ -1,5 +1,5 @@
+import { Color, Sector, Shape } from '@/src/models/interface';
 import React, { createContext, ReactNode, useContext, useState } from 'react';
-import { Color, Sector, Shape } from '../interface';
 
 interface CaptchaContextType {
   // State

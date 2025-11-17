@@ -1,8 +1,8 @@
+import { COLORS, GRID_SIZE, SHAPES } from '@/src/models/constants';
+import { useCaptchaContext } from '@/src/models/context/CaptchaContext';
+import { useStepContext } from '@/src/models/context/StepContext';
+import { CaptchaStep, Color, Shape } from '@/src/models/interface';
 import { useCallback } from 'react';
-import { COLORS, GRID_SIZE, SHAPES } from '../constants';
-import { useCaptchaContext } from '../context/CaptchaContext';
-import { useStepContext } from '../context/StepContext';
-import { CaptchaStep, Color, Shape } from '../interface';
 import useSquareRandomMove from './useSquareRandomMove';
 
 interface UseVideoCaptureProps {

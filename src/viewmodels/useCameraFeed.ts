@@ -1,5 +1,5 @@
+import { useStepContext } from '@/src/models/context/StepContext';
 import { useEffect, useState } from 'react';
-import { useStepContext } from '../context/StepContext';
 
 const useCameraFeed = () => {
   const { videoRef } = useStepContext();

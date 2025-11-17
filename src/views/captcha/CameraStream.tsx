@@ -1,7 +1,7 @@
-import { useSquareContext } from '../shared/context/SquareContext';
-import { useStepContext } from '../shared/context/StepContext';
-import useCameraFeed from '../shared/hooks/useCameraFeed';
-import useVideoCapture from '../shared/hooks/useVideoCapture';
+import { useSquareContext } from '@/src/models/context/SquareContext';
+import { useStepContext } from '@/src/models/context/StepContext';
+import useCameraFeed from '@/src/viewmodels/useCameraFeed';
+import useVideoCapture from '@/src/viewmodels/useVideoCapture';
 
 interface CameraStreamProps {
   onValidate: (success: boolean) => void;

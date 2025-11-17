@@ -1,4 +1,4 @@
-import CaptchaContainer from '@/src/modules/captcha/CaptchaContainer';
+import CaptchaContainer from '@/src/views/captcha/CaptchaContainer';
 
 export default function Home() {
   return (

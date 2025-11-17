@@ -1,13 +1,13 @@
+import { MAX_ATTEMPTS, USER_STATUS } from '@/src/models/constants';
+import { useStepContext } from '@/src/models/context/StepContext';
+import { CaptchaStep } from '@/src/models/interface';
+import useCameraFeed from '@/src/viewmodels/useCameraFeed';
+import useStepAndAttempt from '@/src/viewmodels/useStepAndAttempt';
+import useVideoCapture from '@/src/viewmodels/useVideoCapture';
+import { TriangleAlert } from 'lucide-react';
 import { useCallback } from 'react';
-import { MAX_ATTEMPTS, USER_STATUS } from '../shared/constants';
-import { useStepContext } from '../shared/context/StepContext';
-import useCameraFeed from '../shared/hooks/useCameraFeed';
-import useStepAndAttempt from '../shared/hooks/useStepAndAttempt';
-import useVideoCapture from '../shared/hooks/useVideoCapture';
-import { CaptchaStep } from '../shared/interface';
 import CameraStream from './CameraStream';
 import ImageGridCaptchaSelector from './ImageGridSelector';
-import { TriangleAlert } from 'lucide-react';
 
 const Captcha: React.FC = () => {
   const { userStatus, setUserStatus } = useStepContext();

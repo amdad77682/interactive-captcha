@@ -1,8 +1,8 @@
+import { MAX_ATTEMPTS, USER_STATUS } from '@/src/models/constants';
+import { useCaptchaContext } from '@/src/models/context/CaptchaContext';
+import { useStepContext } from '@/src/models/context/StepContext';
+import { CaptchaStep } from '@/src/models/interface';
 import { useState } from 'react';
-import { MAX_ATTEMPTS, USER_STATUS } from '../constants';
-import { useCaptchaContext } from '../context/CaptchaContext';
-import { useStepContext } from '../context/StepContext';
-import { CaptchaStep } from '../interface';
 
 const useStepAndAttempt = () => {
   const { step, setStep, updateStep, canvasRef, setUserStatus } =

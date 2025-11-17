@@ -1,6 +1,6 @@
-import { COLOR_CLASSES, GRID_SIZE, SHAPE_MAP } from '../shared/constants';
-import { useSquareContext } from '../shared/context/SquareContext';
-import useCaptchaSelector from '../shared/hooks/useCaptchaSelector';
+import { COLOR_CLASSES, GRID_SIZE, SHAPE_MAP } from '@/src/models/constants';
+import { useSquareContext } from '@/src/models/context/SquareContext';
+import useCaptchaSelector from '@/src/viewmodels/useCaptchaSelector';
 
 interface ImageGridCaptchaProps {
   containerRef: React.RefObject<HTMLDivElement | null>;

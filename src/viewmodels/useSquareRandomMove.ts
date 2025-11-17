@@ -1,7 +1,7 @@
+import { MOVE_INTERVAL_MS, SQUARE_SIZE_PERCENT } from '@/src/models/constants';
+import { useSquareContext } from '@/src/models/context/SquareContext';
+import { CaptchaStep } from '@/src/models/interface';
 import { useEffect, useRef, useState } from 'react';
-import { MOVE_INTERVAL_MS, SQUARE_SIZE_PERCENT } from '../constants';
-import { useSquareContext } from '../context/SquareContext';
-import { CaptchaStep } from '../interface';
 
 const useSquareRandomMove = ({ step }: { step: CaptchaStep }) => {
   // State to control whether the square is moving.

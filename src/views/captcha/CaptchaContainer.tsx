@@ -1,8 +1,8 @@
 'use client';
-import { USER_STATUS } from '../shared/constants';
-import { CaptchaProvider } from '../shared/context/CaptchaContext';
-import { SquareProvider } from '../shared/context/SquareContext';
-import { StepProvider, useStepContext } from '../shared/context/StepContext';
+import { USER_STATUS } from '@/src/models/constants';
+import { CaptchaProvider } from '@/src/models/context/CaptchaContext';
+import { SquareProvider } from '@/src/models/context/SquareContext';
+import { StepProvider, useStepContext } from '@/src/models/context/StepContext';
 import Blocked from './Blocked';
 import Captcha from './Captcha';
 import Success from './Success';

@@ -1,5 +1,5 @@
-import { CircleIcon, SquareIcon, TriangleIcon } from "lucide-react";
-import { Color, Shape } from "../interface";
+import { Color, Shape } from '@/src/models/interface';
+import { CircleIcon, SquareIcon, TriangleIcon } from 'lucide-react';
 
 const MAX_ATTEMPTS = 3;
 const USER_STATUS = {
@@ -27,4 +27,14 @@ const SHAPE_MAP: Record<Shape, React.FC<{ className?: string }>> = {
   [Shape.Square]: SquareIcon,
   [Shape.Circle]: CircleIcon,
 };
-export { MAX_ATTEMPTS, MOVE_INTERVAL_MS, SQUARE_SIZE_PERCENT, USER_STATUS , GRID_SIZE, SHAPES, COLORS, COLOR_CLASSES, SHAPE_MAP };
+export {
+  COLOR_CLASSES,
+  COLORS,
+  GRID_SIZE,
+  MAX_ATTEMPTS,
+  MOVE_INTERVAL_MS,
+  SHAPE_MAP,
+  SHAPES,
+  SQUARE_SIZE_PERCENT,
+  USER_STATUS,
+};

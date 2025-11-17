@@ -1,4 +1,4 @@
-import { useCaptchaContext } from '../context/CaptchaContext';
+import { useCaptchaContext } from '@/src/models/context/CaptchaContext';
 
 const useCaptchaSelector = () => {
   const {

@@ -18,8 +18,53 @@
 
 ## Project Overview
 
-An interactive CAPTCHA system that combines camera-based verification with visual pattern recognition. The CAPTCHA process shows the user a live selfie camera feed with a constantly moving square. When the user clicks Continue, the square’s position is locked and a photo is taken. In the next step, that captured image is displayed with the square divided into multiple sectors. Random sectors contain watermarks shaped as triangles, squares, or circles. The system randomly chooses one shape, and the user must select all sectors containing that shape. After clicking Validate, the user is shown whether they passed the CAPTCHA test.
+An interactive CAPTCHA system that combines camera-based verification with visual pattern recognition. The CAPTCHA process shows the user a live selfie camera feed with a constantly moving square. When the user clicks Continue, the square's position is locked and a photo is taken. In the next step, that captured image is displayed with the square divided into multiple sectors. Random sectors contain watermarks shaped as triangles, squares, or circles. The system randomly chooses one shape, and the user must select all sectors containing that shape. After clicking Validate, the user is shown whether they passed the CAPTCHA test.
 
+### Architecture Pattern: MVVM (Model-View-ViewModel)
+
+This project follows the **MVVM (Model-View-ViewModel)** architectural pattern, adapted for React:
+
+```
+┌─────────────────────────────────────────────────┐
+│                    VIEW                          │
+│  (React Components - Presentation Layer)        │
+│  • CameraStream.tsx                             │
+│  • ImageGridSelector.tsx                        │
+│  • Captcha.tsx (Orchestrator)                   │
+│  • Success.tsx, Blocked.tsx                     │
+└──────────────┬──────────────────────────────────┘
+               │ Data Binding (Props & Context)
+               ↓
+┌─────────────────────────────────────────────────┐
+│                 VIEWMODEL                        │
+│  (Custom Hooks - Business Logic Layer)          │
+│  • useVideoCapture (capture & validation logic) │
+│  • useCameraFeed (camera management)            │
+│  • useSquareRandomMove (animation logic)        │
+│  • useStepAndAttempt (flow control)             │
+│  • useCaptchaSelector (selection management)    │
+└──────────────┬──────────────────────────────────┘
+               │ State Management
+               ↓
+┌─────────────────────────────────────────────────┐
+│                   MODEL                          │
+│  (Data Layer - State & Business Entities)       │
+│  • Context APIs (Global State):                 │
+│    - StepContext (step, userStatus, refs)       │
+│    - SquareContext (animation state)            │
+│    - CaptchaContext (challenge data)            │
+│  • Interfaces (TypeScript Types):               │
+│    - Sector, Shape, Color, CaptchaStep         │
+│  • Constants (Configuration)                    │
+└─────────────────────────────────────────────────┘
+```
+
+**Benefits of MVVM in this project:**
+- ✅ **Separation of Concerns**: UI (View) separated from business logic (ViewModel) and data (Model)
+- ✅ **Testability**: ViewModels (hooks) can be tested independently
+- ✅ **Reusability**: ViewModels can be reused across different Views
+- ✅ **Maintainability**: Changes in one layer don't affect others
+- ✅ **Data Binding**: React Context provides automatic updates to Views
 
 ---
 
@@ -43,29 +88,29 @@ interactive-captcha-meldcx/
 │   ├── page.tsx                 # Main entry point 
 │   └── globals.css              # Global styles
 ├── src/
-│   └── modules/
-│       ├── captcha/             # CAPTCHA UI components
-│       │   ├── Blocked.tsx      # Blocked state screen
-│       │   ├── CameraStream.tsx # Camera feed with moving square 
-│       │   ├── Captcha.tsx      # Main orchestrator component
-│       │   ├── CaptchaContainer.tsx  # Root container with providers 
-│       │   ├── ImageGridSelector.tsx # Grid selection interface
-│       │   └── Success.tsx      # Success state screen
-│       └── shared/              # Shared resources
-│           ├── constants/       # Configuration values
-│           │   └── index.tsx
-│           ├── context/         # React Context providers
-│           │   ├── CaptchaContext.tsx   # CAPTCHA data state
-│           │   ├── SquareContext.tsx    # Moving square state
-│           │   └── StepContext.tsx      # Step, user status and refs state
-│           ├── hooks/           # Custom React hooks
-│           │   ├── useCameraFeed.ts         # Camera initialization
-│           │   ├── useCaptchaSelector.ts    # Grid selection logic
-│           │   ├── useSquareRandomMove.ts   # Square movement
-│           │   ├── useStepAndAttempt.ts     # Step & attempt management
-│           │   └── useVideoCapture.ts       # Video frame capture
-│           └── interface/       # TypeScript types
-│               └── index.ts
+│   ├── views/                   # VIEW LAYER (MVVM)
+│   │   └── captcha/             # CAPTCHA UI components
+│   │       ├── Blocked.tsx      # Blocked state screen
+│   │       ├── CameraStream.tsx # Camera feed with moving square 
+│   │       ├── Captcha.tsx      # Main orchestrator component
+│   │       ├── CaptchaContainer.tsx  # Root container with providers 
+│   │       ├── ImageGridSelector.tsx # Grid selection interface
+│   │       └── Success.tsx      # Success state screen
+│   ├── viewmodels/              # VIEWMODEL LAYER (MVVM)
+│   │   ├── useCameraFeed.ts     # Camera initialization & lifecycle
+│   │   ├── useCaptchaSelector.ts # Selection logic
+│   │   ├── useSquareRandomMove.ts # Square animation logic
+│   │   ├── useStepAndAttempt.ts # Flow & retry logic
+│   │   └── useVideoCapture.ts   # Capture & validation logic
+│   └── models/                  # MODEL LAYER (MVVM)
+│       ├── context/             # Global state management
+│       │   ├── CaptchaContext.tsx # Challenge data state
+│       │   ├── SquareContext.tsx  # Animation state
+│       │   └── StepContext.tsx    # Flow state & refs
+│       ├── interface/           # TypeScript type definitions
+│       │   └── index.ts         # Sector, Shape, Color, CaptchaStep
+│       └── constants/           # Configuration values
+│           └── index.tsx        # MAX_ATTEMPTS, SHAPES, COLORS, etc.
 ├── public/                      # Static assets
 ├── package.json                 # Dependencies
 ├── tsconfig.json               # TypeScript config
@@ -76,6 +121,262 @@ interactive-captcha-meldcx/
 ---
 
 ## Architecture & Design Patterns
+
+### Primary Architecture: MVVM (Model-View-ViewModel)
+
+This project implements the **MVVM pattern** adapted for React's component-based architecture. Here's how each layer maps to the codebase:
+
+#### 🎨 VIEW Layer (Presentation)
+**Location**: `src/views/captcha/*.tsx`
+
+**Responsibility**: Pure presentation and user interaction
+
+**Components:**
+- `CameraStream.tsx` - Displays camera feed with moving square overlay
+- `ImageGridSelector.tsx` - Renders captured image with selectable grid
+- `Captcha.tsx` - Main orchestrator that routes between views
+- `Success.tsx`, `Blocked.tsx` - Result screens
+- `CaptchaContainer.tsx` - Root component with provider setup
+
+**Characteristics:**
+- Zero business logic
+- Receives data via props and context
+- Emits user events to ViewModel (via callbacks)
+- Focuses solely on UI rendering
+
+**Example:**
+```tsx
+// CameraStream.tsx - Pure View
+const CameraStream: React.FC<CameraStreamProps> = ({ onValidate }) => {
+  const { videoRef } = useStepContext();           // Data from Model
+  const { cameraError } = useCameraFeed();         // State from ViewModel
+  const { squarePosition, squareSize } = useSquareContext(); // Data from Model
+  const { containerRef, handleCapture } = useVideoCapture({ onValidate }); // ViewModel
+  
+  return (
+    <div ref={containerRef}>
+      <video ref={videoRef} />  {/* Display only */}
+      <div style={{ top: squarePosition.top }} /> {/* Display only */}
+      <button onClick={handleCapture}>Continue</button> {/* Event to ViewModel */}
+    </div>
+  );
+};
+```
+
+---
+
+#### 🧠 VIEWMODEL Layer (Business Logic)
+**Location**: `src/viewmodels/*.ts`
+
+**Responsibility**: Business logic, data transformation, and state management
+
+**Custom Hooks (ViewModels):**
+- `useVideoCapture` - Handles frame capture, grid generation, validation logic
+- `useCameraFeed` - Manages camera initialization, permissions, cleanup
+- `useSquareRandomMove` - Controls square animation algorithm
+- `useStepAndAttempt` - Manages CAPTCHA flow and retry logic
+- `useCaptchaSelector` - Handles user selection logic
+
+**Characteristics:**
+- Contains all business logic
+- Interacts with Model (Context APIs)
+- Provides data and functions to View
+- No direct DOM manipulation
+- Testable in isolation
+
+**Example:**
+```tsx
+// useVideoCapture.ts - ViewModel
+const useVideoCapture = ({ onValidate }: UseVideoCaptureProps) => {
+  // Access Model
+  const { videoRef, canvasRef, updateStep } = useStepContext();
+  const { setGridSectors, setTarget, setCapturedImage, selectedSectors, gridSectors, target } = useCaptchaContext();
+  
+  // Business Logic: Capture frame
+  const handleCapture = useCallback(() => {
+    const canvas = canvasRef.current;
+    const video = videoRef.current;
+    
+    // Complex logic for capturing and processing
+    ctx.drawImage(video, 0, 0);
+    const imageData = canvas.toDataURL('image/jpeg');
+    
+    // Update Model
+    setCapturedImage(imageData);
+    generateGridChallenge();
+    updateStep(CaptchaStep.Grid);
+  }, [canvasRef, videoRef, setCapturedImage, updateStep]);
+  
+  // Business Logic: Validation
+  const handleValidate = useCallback(() => {
+    const correctSectors = new Set(
+      gridSectors.filter(s => s.shape === target.shape && s.color === target.color).map(s => s.id)
+    );
+    const isSuccess = selectedSectors.size === correctSectors.size && 
+                      [...selectedSectors].every(id => correctSectors.has(id));
+    onValidate(isSuccess);
+  }, [gridSectors, target, selectedSectors, onValidate]);
+  
+  // Expose to View
+  return { containerRef, handleCapture, handleValidate };
+};
+```
+
+---
+
+#### 📦 MODEL Layer (Data)
+**Location**: `src/models/` (context, interface, constants)
+
+**Responsibility**: Data structures, state storage, and data access
+
+**Components:**
+
+1. **Context APIs (State Management)** - `src/models/context/`:
+   - `StepContext.tsx` - Step flow, user status, DOM refs
+   - `SquareContext.tsx` - Square animation state
+   - `CaptchaContext.tsx` - Challenge data (target, sectors, selections)
+
+2. **TypeScript Interfaces (Data Structures)** - `src/models/interface/`:
+   ```typescript
+   // interface/index.ts
+   interface Sector {
+     id: number;
+     shape: Shape | null;
+     color: Color | null;
+   }
+   
+   enum CaptchaStep {
+     Camera = 'camera',
+     Grid = 'grid',
+     Result = 'result'
+   }
+   ```
+
+3. **Constants (Configuration)** - `src/models/constants/`:
+   ```typescript
+   // constants/index.tsx
+   const MAX_ATTEMPTS = 3;
+   const GRID_SIZE = 5;
+   const USER_STATUS = { pending, success, blocked, failed };
+   ```
+
+**Characteristics:**
+- Pure data structures
+- No business logic
+- Provides getters/setters via Context
+- Single source of truth
+
+**Example:**
+```tsx
+// CaptchaContext.tsx - Model
+export const CaptchaProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  // State (Data Storage)
+  const [target, setTarget] = useState<{ shape: Shape; color: Color } | null>(null);
+  const [selectedSectors, setSelectedSectors] = useState<Set<number>>(new Set());
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [gridSectors, setGridSectors] = useState<Sector[]>([]);
+
+  // Helper (Model Logic - Data Manipulation)
+  const toggleSectorSelection = (sectorId: number) => {
+    setSelectedSectors(prev => {
+      const newSet = new Set(prev);
+      newSet.has(sectorId) ? newSet.delete(sectorId) : newSet.add(sectorId);
+      return newSet;
+    });
+  };
+
+  // Expose to ViewModel
+  return (
+    <CaptchaContext.Provider value={{
+      target, selectedSectors, capturedImage, gridSectors,
+      setTarget, setSelectedSectors, setCapturedImage, setGridSectors,
+      toggleSectorSelection
+    }}>
+      {children}
+    </CaptchaContext.Provider>
+  );
+};
+```
+
+---
+
+### MVVM Data Flow
+
+```
+User Interaction → VIEW → ViewModel → Model → ViewModel → VIEW → UI Update
+```
+
+**Concrete Example: User Clicks "Continue" Button**
+
+1. **VIEW** (`CameraStream.tsx`):
+   ```tsx
+   <button onClick={handleCapture}>Continue</button>
+   ```
+
+2. **VIEWMODEL** (`useVideoCapture.ts`):
+   ```typescript
+   const handleCapture = () => {
+     // Business logic: Capture frame
+     ctx.drawImage(video, 0, 0);
+     const imageData = canvas.toDataURL('image/jpeg');
+     
+     // Update MODEL
+     setCapturedImage(imageData);      // → CaptchaContext
+     generateGridChallenge();          // Generate data
+     updateStep(CaptchaStep.Grid);     // → StepContext
+   };
+   ```
+
+3. **MODEL** (`CaptchaContext` + `StepContext`):
+   ```typescript
+   // State updated
+   capturedImage: "data:image/jpeg;base64,..."
+   step: CaptchaStep.Grid
+   gridSectors: [...25 sectors]
+   target: { shape: 'triangle', color: 'red' }
+   ```
+
+4. **VIEWMODEL** (Context consumers automatically get updates)
+
+5. **VIEW** (React re-renders with new data):
+   ```tsx
+   // Captcha.tsx switches view
+   {step === CaptchaStep.Grid && <ImageGridSelector />}
+   
+   // ImageGridSelector.tsx displays new data
+   <img src={capturedImage} />
+   <div>{gridSectors.map(sector => ...)}</div>
+   ```
+
+---
+
+### Benefits of MVVM in This Project
+
+| Benefit | Implementation |
+|---------|----------------|
+| **Separation of Concerns** | View components have zero business logic |
+| **Testability** | Hooks can be tested independently with mock contexts |
+| **Reusability** | Same ViewModel (hook) can be used by multiple Views |
+| **Maintainability** | Changes to business logic don't affect UI structure |
+| **Type Safety** | TypeScript ensures Model consistency |
+| **Two-Way Binding** | React Context provides automatic UI updates |
+| **Scalability** | Easy to add new features by adding hooks/contexts |
+
+---
+
+### Why MVVM for This Project?
+
+1. **Complex State Management**: Multiple interconnected states (camera, square, grid, user status)
+2. **Asynchronous Operations**: Camera initialization, frame capture need business logic layer
+3. **Validation Logic**: Grid validation is complex and needs isolation from UI
+4. **Testability Requirements**: Business logic must be testable without rendering UI
+5. **React Best Practices**: Custom hooks are React's natural ViewModel layer
+
+---
+
+### Additional Design Patterns
+
+Beyond the primary MVVM architecture, the project implements several supporting patterns:
 
 ### 1. **Provider Pattern (Context API)**
 
@@ -93,10 +394,11 @@ The application uses React Context API extensively to avoid prop drilling and pr
 - Centralized state management
 - Easy state sharing across component tree
 - Type-safe with TypeScript
+- **Supports MVVM**: Contexts act as the Model layer
 
-### 2. **Custom Hooks Pattern**
+### 2. **Custom Hooks Pattern (ViewModel Layer)**
 
-Business logic is extracted into reusable custom hooks.
+Business logic is extracted into reusable custom hooks, which serve as the **ViewModel layer in MVVM**.
 
 **Examples:**
 
@@ -107,13 +409,14 @@ Business logic is extracted into reusable custom hooks.
 **Benefits:**
 
 - Separation of concerns
-- Reusability
-- Testability
-- Cleaner components (focus on UI)
+- Reusability across components
+- Testability (can test without rendering UI)
+- Cleaner components (focus on presentation)
+- **Core to MVVM**: Hooks are ViewModels that connect View and Model
 
-### 3. **Component Composition Pattern**
+### 3. **Component Composition Pattern (View Layer)**
 
-Small, focused components composed together to create complex UIs.
+Small, focused components composed together to create complex UIs, forming the **View layer in MVVM**.
 
 **Example:**
 

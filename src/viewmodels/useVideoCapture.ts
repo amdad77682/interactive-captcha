@@ -9,8 +9,8 @@ interface UseVideoCaptureProps {
   onValidate: (success: boolean) => void;
 }
 const useVideoCapture = ({ onValidate }: UseVideoCaptureProps) => {
-  const { step, videoRef, canvasRef, updateStep } = useStepContext();
-  const { containerRef, setIsSquareMoving } = useSquareRandomMove({ step });
+  const { videoRef, canvasRef, updateStep } = useStepContext();
+  const { containerRef, setIsSquareMoving } = useSquareRandomMove();
 
   // Use global context for shared state
   const {
@@ -18,7 +18,6 @@ const useVideoCapture = ({ onValidate }: UseVideoCaptureProps) => {
     setGridSectors,
     target,
     setTarget,
-    capturedImage,
     setCapturedImage,
     selectedSectors,
   } = useCaptchaContext();

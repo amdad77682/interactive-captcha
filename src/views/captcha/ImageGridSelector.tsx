@@ -22,10 +22,6 @@ const ImageGridCaptchaSelector: React.FC<ImageGridCaptchaProps> = ({
 
   const ShapeComponent = target ? SHAPE_MAP[target.shape] : null;
   const targetColorClass = target ? COLOR_CLASSES[target.color] : '';
-
-  const handleSelectSector = (sectorId: number) => {
-    toggleSectorSelection(sectorId);
-  };
   return (
     <div className="flex flex-col">
       <div className="flex items-center justify-center gap-4  text-center mb-4 p-4 rounded-lg">
@@ -70,7 +66,7 @@ const ImageGridCaptchaSelector: React.FC<ImageGridCaptchaProps> = ({
             return (
               <div
                 key={sector.id}
-                onClick={() => handleSelectSector(sector.id)}
+                onClick={() => toggleSectorSelection(sector.id)}
                 className={`border border-white/20 flex items-center justify-center cursor-pointer transition-all duration-200 ${selectedSectors.has(sector.id) ? 'bg-blue-500/50' : 'bg-transparent hover:bg-white/20'}`}
               >
                 {SectorShapeComponent && sector.color && (

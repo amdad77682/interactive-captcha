@@ -1,9 +1,9 @@
-import CaptchaContainer from '@/src/views/captcha/CaptchaUserSteps';
-
+import CaptchaUserSteps from '@/src/views/captcha/CaptchaUserSteps';
+/* Main Page Component */
 export default function Home() {
   return (
     <main>
-      <CaptchaContainer />
+      <CaptchaUserSteps />
     </main>
   );
 }

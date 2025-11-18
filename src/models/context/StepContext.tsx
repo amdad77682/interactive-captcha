@@ -24,13 +24,20 @@ const StepContext = createContext<StepContextType | undefined>(undefined);
 export const StepProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
+  /* State to manage current CAPTCHA step */
   const [step, setStep] = useState<CaptchaStep>(CaptchaStep.Camera);
+  /* State to manage user status */
   const [userStatus, setUserStatus] = useState<string>(USER_STATUS.pending);
 
-  // Refs are stable across re-renders
+  /* Refs for video elements */
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  /* Ref for canvas element */
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  /**
+   * Update the current step of the CAPTCHA process.
+   * @param newStep The new step to update to
+   */
   const updateStep = (newStep: CaptchaStep) => {
     setStep(newStep);
   };

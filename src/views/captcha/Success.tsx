@@ -4,7 +4,7 @@ interface SuccessProps {}
 
 const Success: React.FC<SuccessProps> = () => {
   return (
-    <div className="text-center p-8 rounded-lg shadow-2xl">
+    <div className="text-center p-8 rounded-lg ">
       <CheckCheck size={80} className="mx-auto text-green-400" />
       <h2 className="text-4xl font-bold text-green-400 mb-4">
         Validation Successful!

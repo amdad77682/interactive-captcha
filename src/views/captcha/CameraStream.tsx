@@ -8,12 +8,14 @@ interface CameraStreamProps {
 }
 
 const CameraStream: React.FC<CameraStreamProps> = ({ onValidate }) => {
+  /* Access videoRef from StepContext */
   const { videoRef } = useStepContext();
+  /* Custom hook to manage camera feed and errors */
   const { cameraError } = useCameraFeed();
+  /* Access square position and size from SquareContext */
   const { squarePosition, squareSize } = useSquareContext();
-
+  /* Custom hook to manage video capture */
   const { containerRef, handleCapture } = useVideoCapture({ onValidate });
-  // Refs for DOM elements
 
   return (
     <>
@@ -27,11 +29,7 @@ const CameraStream: React.FC<CameraStreamProps> = ({ onValidate }) => {
           playsInline
           className="w-full h-full object-cover"
         />
-        {cameraError && (
-          <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center text-center p-4">
-            <p className="text-red-400">{cameraError}</p>
-          </div>
-        )}
+
         <div
           className="absolute border-4 border-dashed border-yellow-400 transition-all duration-1000 ease-in-out"
           style={{

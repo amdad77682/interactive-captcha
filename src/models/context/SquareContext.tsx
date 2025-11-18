@@ -12,7 +12,9 @@ const SquareContext = createContext<SquareContextType | undefined>(undefined);
 export const SquareProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
+  /* State to manage square size and position */
   const [squareSize, setSquareSize] = useState<number>(200);
+  /* Default position can be adjusted as needed */
   const [squarePosition, setSquarePosition] = useState({ top: 10, left: 10 });
 
   return (

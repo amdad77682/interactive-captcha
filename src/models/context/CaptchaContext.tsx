@@ -26,15 +26,23 @@ const CaptchaContext = createContext<CaptchaContextType | undefined>(undefined);
 export const CaptchaProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
+  /* State to manage CAPTCHA-related data */
   const [target, setTarget] = useState<{ shape: Shape; color: Color } | null>(
     null
   );
+  /* Using Set to manage selected sectors for efficient add/remove operations */
   const [selectedSectors, setSelectedSectors] = useState<Set<number>>(
     new Set()
   );
+  /* State to hold the captured image from the camera */
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  /* State to hold the grid sectors information */
   const [gridSectors, setGridSectors] = useState<Sector[]>([]);
 
+  /**
+   * Toggle the selection state of a sector by its ID.
+   * @param sectorId
+   */
   const toggleSectorSelection = (sectorId: number) => {
     setSelectedSectors(prev => {
       const newSet = new Set(prev);
@@ -46,7 +54,9 @@ export const CaptchaProvider: React.FC<{ children: ReactNode }> = ({
       return newSet;
     });
   };
-
+/**
+ * Reset the CAPTCHA state to initial values.
+ */
   const resetCaptchaState = () => {
     setTarget(null);
     setSelectedSectors(new Set());

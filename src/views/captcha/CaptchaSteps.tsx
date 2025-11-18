@@ -9,11 +9,14 @@ import { useCallback } from 'react';
 import CameraStream from './CameraStream';
 import ImageGridCaptchaSelector from './ImageGridSelector';
 
-const Captcha: React.FC = () => {
+const CaptchaSteps: React.FC = () => {
+  /* Access user status and setter from StepContext */
   const { userStatus, setUserStatus } = useStepContext();
+  /* Custom hook to manage steps and attempts */
   const { handleTryAgain, step, attemptsLeft, setAttemptsLeft, canvasRef } =
     useStepAndAttempt();
-  useCameraFeed();
+  /* Custom hook to manage camera feed and errors */
+  const { cameraError } = useCameraFeed();
 
   /**
    * Callback function triggered when the CAPTCHA validation is complete.
@@ -22,13 +25,16 @@ const Captcha: React.FC = () => {
   const handleValidate = useCallback(
     (success: boolean) => {
       if (success) {
+        /* Update user status to success on successful validation */
         setUserStatus(USER_STATUS.success);
       } else {
         const newAttemptsLeft = attemptsLeft - 1;
         setAttemptsLeft(newAttemptsLeft);
         if (newAttemptsLeft <= 0) {
+          /* Update user status to blocked if no attempts are left */
           setUserStatus(USER_STATUS.blocked);
         } else {
+          /* Update user status to failed if validation fails but attempts remain */
           setUserStatus(USER_STATUS.failed);
         }
       }
@@ -41,8 +47,10 @@ const Captcha: React.FC = () => {
 
   const rederCaptchaStep = () => {
     switch (step) {
+      /* Render CameraStream component for Camera step */
       case CaptchaStep.Camera:
         return <CameraStream onValidate={handleValidate} />;
+      /* Render ImageGridCaptchaSelector component for Grid step */
       case CaptchaStep.Grid:
         return (
           <ImageGridCaptchaSelector
@@ -54,6 +62,18 @@ const Captcha: React.FC = () => {
         return null;
     }
   };
+  /* Display camera error message if any */
+  if (cameraError) {
+    return (
+      <div className="text-center p-8 rounded-lg ">
+        <TriangleAlert size={80} className="mx-auto text-red-400" />
+        <h2 className="text-4xl font-bold text-red-400 mb-4">
+          Camera Access Error
+        </h2>
+        <p className="text-lg ">{cameraError}</p>
+      </div>
+    );
+  }
   // Camera step component goes here
   return (
     <div>
@@ -93,4 +113,4 @@ const Captcha: React.FC = () => {
   );
 };
 
-export default Captcha;
+export default CaptchaSteps;

@@ -7,8 +7,10 @@ import { useStepContext } from '../models/context/StepContext';
 const useSquareRandomMove = () => {
   // State to control whether the square is moving.
   const [isSquareMoving, setIsSquareMoving] = useState(true);
+  // Get the current CAPTCHA step from context.
   const { step } = useStepContext();
 
+  // Get functions to set square position and size from SquareContext.
   const { setSquarePosition, setSquareSize } = useSquareContext();
 
   const containerRef = useRef<HTMLDivElement>(null);

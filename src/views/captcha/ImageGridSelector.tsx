@@ -1,6 +1,6 @@
 import { COLOR_CLASSES, GRID_SIZE, SHAPE_MAP } from '@/src/models/constants';
+import { useCaptchaContext } from '@/src/models/context/CaptchaContext';
 import { useSquareContext } from '@/src/models/context/SquareContext';
-import useCaptchaSelector from '@/src/viewmodels/useCaptchaSelector';
 
 interface ImageGridCaptchaProps {
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -11,14 +11,16 @@ const ImageGridCaptchaSelector: React.FC<ImageGridCaptchaProps> = ({
   containerRef,
   handleValidate,
 }) => {
+  /* Access square position and size from SquareContext */
   const { squarePosition, squareSize } = useSquareContext();
+  /* Access CAPTCHA context values and functions */
   const {
     target,
     selectedSectors,
     capturedImage,
     gridSectors,
     toggleSectorSelection,
-  } = useCaptchaSelector();
+  } = useCaptchaContext();
 
   const ShapeComponent = target ? SHAPE_MAP[target.shape] : null;
   const targetColorClass = target ? COLOR_CLASSES[target.color] : '';
